@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_modular/src/flutter_modular_module.dart';
 import 'package:modular_core/modular_core.dart';
 
 import '../../../flutter_modular.dart';
@@ -49,9 +48,9 @@ class ModularAppState extends State<ModularApp> {
 
   @override
   void dispose() {
-    // Modular.destroy();
-    // printResolverFunc?.call('-- ${widget.module.runtimeType} DISPOSED');
-    // cleanGlobals();
+    Modular.destroy();
+    printResolverFunc?.call('-- ${widget.module.runtimeType} DISPOSED');
+    cleanGlobals();
     super.dispose();
   }
 
