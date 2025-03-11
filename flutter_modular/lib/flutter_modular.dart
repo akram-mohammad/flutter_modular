@@ -118,6 +118,7 @@ IModularBase get Modular {
 void cleanModular() {
   _modular?.destroy();
   _modular = null;
+  injector.dispose();
 }
 
 /// clean all
