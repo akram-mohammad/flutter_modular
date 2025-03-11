@@ -28,6 +28,7 @@ class BindServiceImpl extends BindService {
   @override
   ResultDart<Unit, ModularError> replaceInstance<T>(T instance, [String? key]) {
     injector.replaceInstance(instance, key: key);
+    injector.commit();
     return Success.unit();
   }
 }

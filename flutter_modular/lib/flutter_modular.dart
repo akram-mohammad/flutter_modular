@@ -3,12 +3,32 @@ library flutter_modular;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:flutter_modular/src/flutter_modular_module.dart';
+import 'package:flutter_modular/src/domain/services/bind_service.dart';
+// import 'bind_s';
+import 'package:flutter_modular/src/domain/services/module_service.dart';
+import 'package:flutter_modular/src/domain/services/route_service.dart';
+import 'package:flutter_modular/src/domain/usecases/bind_module.dart';
+import 'package:flutter_modular/src/domain/usecases/dispose_bind.dart';
+import 'package:flutter_modular/src/domain/usecases/finish_module.dart';
+import 'package:flutter_modular/src/domain/usecases/get_arguments.dart';
+import 'package:flutter_modular/src/domain/usecases/get_bind.dart';
+import 'package:flutter_modular/src/domain/usecases/get_route.dart';
+import 'package:flutter_modular/src/domain/usecases/replace_instance.dart';
+import 'package:flutter_modular/src/domain/usecases/report_pop.dart';
+import 'package:flutter_modular/src/domain/usecases/report_push.dart';
+import 'package:flutter_modular/src/domain/usecases/set_arguments.dart';
+import 'package:flutter_modular/src/domain/usecases/start_module.dart';
+import 'package:flutter_modular/src/domain/usecases/unbind_module.dart';
+import 'package:flutter_modular/src/infra/services/bind_service_impl.dart';
+import 'package:flutter_modular/src/infra/services/module_service_impl.dart';
+import 'package:flutter_modular/src/infra/services/route_service_impl.dart';
+import 'package:flutter_modular/src/infra/services/url_service/url_service.dart';
+import 'package:flutter_modular/src/presenter/modular_base.dart';
+import 'package:flutter_modular/src/presenter/navigation/modular_route_information_parser.dart';
+import 'package:flutter_modular/src/presenter/navigation/modular_router_delegate.dart';
 import 'package:modular_core/modular_core.dart';
 
-import 'src/presenter/modular_base.dart';
 import 'src/presenter/navigation/modular_page.dart';
-import 'src/presenter/navigation/modular_router_delegate.dart';
 import 'src/presenter/navigation/router_outlet_delegate.dart';
 
 export 'package:modular_core/modular_core.dart'
@@ -37,11 +57,58 @@ export 'src/presenter/navigation/transitions/transitions.dart';
 export 'src/presenter/widgets/modular_app.dart';
 export 'src/presenter/widgets/navigation_listener.dart';
 
+late AutoInjector injector;
+
 IModularBase? _modular;
 
 /// Instance of Modular for search binds and route.
 // ignore: non_constant_identifier_names
 IModularBase get Modular {
+  if (_modular == null) {
+    final _innerInjector = AutoInjector(
+      tag: 'ModularApp',
+      on: (i) {
+        i.addInstance<AutoInjector>(i);
+        i.commit();
+      },
+    );
+
+    injector = AutoInjector(
+      tag: 'ModularCore',
+      on: (i) {
+        //datasource
+        i.addInstance<AutoInjector>(_innerInjector);
+        i.addSingleton<Tracker>(Tracker.new);
+        //infra
+        i.add<BindService>(BindServiceImpl.new);
+        i.add<ModuleService>(ModuleServiceImpl.new);
+        i.add<RouteService>(RouteServiceImpl.new);
+        i.add<UrlService>(UrlService.create);
+        //domain
+        i.add<DisposeBind>(DisposeBindImpl.new);
+        i.add<FinishModule>(FinishModuleImpl.new);
+        i.add<GetBind>(GetBindImpl.new);
+        i.add<GetRoute>(GetRouteImpl.new);
+        i.add<StartModule>(StartModuleImpl.new);
+        i.add<GetArguments>(GetArgumentsImpl.new);
+        i.add<BindModule>(BindModuleImpl.new);
+        i.add<ReportPop>(ReportPopImpl.new);
+        i.add<SetArguments>(SetArgumentsImpl.new);
+        i.add<UnbindModule>(UnbindModuleImpl.new);
+        i.add<ReportPush>(ReportPushImpl.new);
+        i.add<ReplaceInstance>(ReplaceInstanceImpl.new);
+        //presenter
+        i.addInstance(GlobalKey<NavigatorState>());
+        i.addSingleton<ModularRouteInformationParser>(
+            ModularRouteInformationParser.new);
+        i.addSingleton<ModularRouterDelegate>(ModularRouterDelegate.new);
+        i.add<IModularNavigator>(() => i<ModularRouterDelegate>());
+        i.addLazySingleton<IModularBase>(ModularBase.new);
+
+        i.commit();
+      },
+    );
+  }
   _modular ??= injector.get<IModularBase>();
   return _modular!;
 }
