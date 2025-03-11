@@ -49,6 +49,7 @@ class ModularAppState extends State<ModularApp> {
   @override
   void dispose() {
     Modular.destroy();
+    printResolverFunc?.call('-- MODULAR DISPOSED');
     printResolverFunc?.call('-- ${widget.module.runtimeType} DISPOSED');
     cleanGlobals();
     super.dispose();

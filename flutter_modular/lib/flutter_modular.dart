@@ -65,7 +65,7 @@ IModularBase? _modular;
 // ignore: non_constant_identifier_names
 IModularBase get Modular {
   if (_modular == null) {
-    debugPrint("NEW modular");
+    print("NEW modular");
     final _innerInjector = AutoInjector(
       tag: 'ModularApp',
       on: (i) {
