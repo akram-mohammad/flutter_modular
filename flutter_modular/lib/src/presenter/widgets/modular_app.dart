@@ -41,7 +41,9 @@ class ModularAppState extends State<ModularApp> {
   @override
   void initState() {
     super.initState();
+    injector.commit();
     Modular.init(widget.module);
+    injector.commit();
     if ((Modular as ModularBase).flags.isDebug) {
       setPrintResolver(debugPrint);
     }
