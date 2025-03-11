@@ -49,9 +49,6 @@ IModularBase get Modular {
 /// clean Modular
 void cleanModular() {
   _modular?.destroy();
-  injector.disposeRecursive();
-  injector.dispose();
-  injector.;
   _modular = null;
 }
 
